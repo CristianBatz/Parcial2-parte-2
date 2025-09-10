@@ -18,20 +18,23 @@ class GestionPedido():
 
     def agregar_pedido(self):
         print("=== Registrar pedido ===")
-        codigo = input("Digite el código del pedido: ")
-        nombre = input("Digite el nombre del cliente: ")
-        producto = input("Digite el producto del pedido: ")
-        cantidad = input("Digite la cantidad del pedido: ")
-        prioridad = input("Digite la prioridad del pedido (urgente/normal): ")
+        codigo = input("Código del pedido: ")
+        nombre = input("Nombre del cliente: ")
+        producto = input("Producto: ")
+        cantidad = input("Cantidad: ")
+        prioridad = input("Prioridad (urgente/normal): ").lower()
 
-        pedido = Pedidos(nombre,producto,cantidad,prioridad)
+        self.Registrar_pedido[codigo] = {
+            "nombre": nombre,
+            "producto": producto,
+            "cantidad": cantidad,
+            "prioridad": prioridad
+        }
 
-        self.Registrar_pedido[codigo] = pedido
+        self.mostrar_infoA()
 
-        pedido.mostrar_info()
-
-        if prioridad.lower() == "urgente":
-            NotificacionPedidoUrgente.notificar(nombre, producto)
+        if prioridad == "urgente":
+            NotificacionPedidoUrgente.notificar(nombre, codigo)
 
     def buscar_pedido(self):
         print("=== Buscando pedido ===")
@@ -42,7 +45,7 @@ class GestionPedido():
         else:
             print(" Pedido no encontrado.")
 
-    def mostrar_info(self):
+    def mostrar_infoA(self):
         if not self.Registrar_pedido:
             print("Pedido no encontrado.")
         else:
@@ -50,20 +53,29 @@ class GestionPedido():
                 print(f"codigo: {codigo}")
                 pedido.mostrar_info()
 
-class GuardarPedido:
-    def guardar_pedido(self):
-        with open("pedidos.log", "w", encoding="utf-8") as f:
-            pass
+class GestionArchivosTextos:
+    try:
+        def cargar_datos(self):
+            with open("pedido.log", "w",encoding="utf-8") as f:
+                for linea in f:
+                    linea = linea.strip()
+                    if linea:
+                        codigo,nombre,producto,cantidad,prioridad = linea.split(",")
+                        self.Registrar_pedido[codigo] = {
+                            "nombre": nombre,
+                            "producto": producto,
+                            "cantidad": cantidad,
+                            "prioridad": prioridad
+                            }
+            print("Pedidos cargados")
+    except FileNotFoundError:
+        print("Archivo pedido.log no existe,se creara un al guardar")
 
-
-
-class NotificacionPedidoUrgente(GestionPedido):
+class NotificacionPedidoUrgente():
 
     def notificar(self,nombre,codigo):
         print("=== Pedidos Urgente ===")
-        print(f"El pedido con nombre: {nombre} tiene un pedido urgente de codigo: {codigo}")
-
-
+        print(f"Cliente: {nombre}, Código: {codigo}")
 
 class Menu:
     def menu_mostrar(self):
@@ -95,9 +107,3 @@ while opcion != 4:
             print("Saliendo del programa")
         case _:
             print("Opcion no valida")
-
-
-
-
-
-
