@@ -26,11 +26,12 @@ class GestionPedido:
 
         pedido = Pedidos(nombre, producto, cantidad, prioridad)
         self.registrar_pedidos[codigo] = pedido
+        notificar = NotificacionPedidoUrgente()
 
         pedido.mostrar_info()
 
         if prioridad == "urgente":
-            NotificacionPedidoUrgente.notificar(pedido, codigo)
+            notificar.notificar(pedido, codigo)
 
     def buscar_pedido(self):
         print("=== Buscar pedido ===")
@@ -67,12 +68,12 @@ class GestionArchivosTextos:
         except FileNotFoundError:
             print("Archivo 'pedido.log' no encontrado. Se creará al guardar.")
 
-        def guardar_datos(self):
-            with open("pedido.log", "w", encoding="utf-8") as f:
-                for codigo,pedido in self.gestor.registrar_pedidos.items():
-                    linea = f"{codigo}, {pedido.nombre}, {pedido.cantidad}, {pedido.prioridad}\n"
-                    f.write(linea)
-            print("Pedidos guardados en archivo.")
+    def guardar_datos(self):
+        with open("pedido.log", "w", encoding="utf-8") as f:
+            for codigo,pedido in self.gestor.registrar_pedidos.items():
+                linea = f"{codigo}, {pedido.nombre}, {pedido.cantidad}, {pedido.prioridad}\n"
+                f.write(linea)
+        print("Pedidos guardados en archivo.")
 
 class NotificacionPedidoUrgente():
     def notificar(self,pedido,codigo):
