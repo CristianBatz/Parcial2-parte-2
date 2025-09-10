@@ -13,45 +13,58 @@ class Pedidos(Cliente):
         print(f"Nombre: {self.nombre}, producto: {self.producto}, cantidad: {self.cantidad}")
 
 class GestionPedido(Pedidos):
-    def __init__(self,codigo):
-        self.codigo = codigo
+    def __init__(self):
         self.Registrar_pedido = {}
 
     def agregar_pedido(self):
-        print("=== Registro de pedidos ===")
-        nombre = input("Nombre del cliente: ")
-        codigo = input("Digite el codigo del pedido: ")
+        print("=== Registrar pedido ===")
+        codigo = input("Digite el código del pedido: ")
+        nombre = input("Digite el nombre del cliente: ")
         producto = input("Digite el producto del pedido: ")
         cantidad = input("Digite la cantidad del pedido: ")
-        prioridad = input("Digite la prioridad del pedido: ")
+        prioridad = input("Digite la prioridad del pedido (urgente/normal): ")
 
-        pedido = Pedido(nombre,producto,cantidad,prioridad)
+        pedido = Pedidos(nombre,producto,cantidad,prioridad)
+
         self.Registrar_pedido[codigo] = pedido
 
-        self.nombre = nombre
-        self.producto = producto
-        self.cantidad = cantidad
-        self.prioridad = prioridad
+        pedido.mostrar_info()
 
-        self.Registrar_pedido[codigo] = {
-            "nombre": nombre,
-            "producto": producto,
-            "cantidad": cantidad,
-            "prioridad": prioridad
-        }
+        if prioridad.lower() == "Urgente":
+            NotificacionPedidoUrgente.notificar(nombre, producto)
 
-        self.mostrar_info()
+    def buscar_pedido(self):
+        print("=== Buscando pedido ===")
+        codigo = input("Digite el código del pedido a buscar: ")
+        if codigo in self.Registrar_pedido:
+            print(f"Pedido encontrado:")
+            self.Registrar_pedido[codigo].mostrar_info()
+        else:
+            print(" Pedido no encontrado.")
+
+    def mostrar_info(self):
+        if not self.Registrar_pedido:
+            print("Pedido no encontrado.")
+        else:
+            for codigo,pedido in self.Registrar_pedido.items():
+                print(f"codigo: {codigo}")
+                pedido.mostrar_info()
 
 class GuardarPedido:
     pass
 
+
 class NotificacionPedidoUrgente(GestionPedido):
-    def __init__(self,codigo,nombre,producto,cantidad,prioridad):
-        super().__init__(codigo,nombre,producto,cantidad,prioridad)
+
+    def notificar(self,codigo):
+        pass
 
 
 class Busqueda:
-    pass
+    def guardar_pedido(self):
+        with open("pedidos.log","w",encoding="utf-8") as f:
+            pass
+
 
 
 class Menu:
@@ -64,7 +77,7 @@ class Menu:
 
 
 menu = Menu()
-gestion_pedidos = GestionPedido("000","","","","")
+gestion_pedidos = GestionPedido()
 opcion = 0
 while opcion != 4:
 
@@ -74,15 +87,48 @@ while opcion != 4:
         case 1:
             gestion_pedidos.agregar_pedido()
         case 2:
-            pass
+            gestion_pedidos.buscar_pedido()
         case 3:
             print("Pedidos registrados:")
             for codigo, datos in gestion_pedidos.Registrar_pedido.items():
-                print(f"Código: {codigo}, nombre: {datos['nombre']}, Producto: {datos['producto']}, cantidad: {datos['cantidad']}, prioridad: {datos['prioridad']}")
+                print(f"codigo: {codigo}")
+                datos.mostrar_info()
         case 4:
             print("Saliendo del programa")
         case _:
             print("Opcion no valida")
+
+
+
+
+
+            def mostrar_todos(self):
+                if not self.Registrar_pedido:
+                    print("No hay pedidos registrados.")
+                else:
+                    for codigo, pedido in self.Registrar_pedido.items():
+                        print(f"\nCódigo: {codigo}")
+                        pedido.mostrar_info()
+
+
+            def guardar_en_archivo(self, nombre_archivo="pedidos.txt"):
+                GuardarPedido.guardar(self.Registrar_pedido, nombre_archivo)
+
+
+    class GuardarPedido:
+        @staticmethod
+        def guardar(pedidos, nombre_archivo):
+            with open(nombre_archivo, "w") as f:
+                for codigo, pedido in pedidos.items():
+                    f.write(f"{codigo},{pedido.nombre},{pedido.producto},{pedido.cantidad},{pedido.prioridad}\n")
+            print(f"✅ Pedidos guardados en {nombre_archivo}")
+
+
+    class NotificacionPedidoUrgente:
+        @staticmethod
+        def notificar(nombre, producto):
+            print(f"🚨 ¡Atención! El cliente {nombre} ha realizado un pedido urgente del producto '{producto}'.")
+
 
 
 
