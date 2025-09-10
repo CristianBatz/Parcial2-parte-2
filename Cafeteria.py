@@ -21,7 +21,7 @@ class GestionPedido:
         codigo = input("Código del pedido: ")
         nombre = input("Nombre del cliente: ")
         producto = input("Producto: ")
-        cantidad = input("Cantidad: ")
+        cantidad = int(input("Cantidad: "))
         prioridad = input("Prioridad (urgente/normal): ").lower()
 
         pedido = Pedidos(nombre, producto, cantidad, prioridad)
@@ -71,7 +71,7 @@ class GestionArchivosTextos:
     def guardar_datos(self):
         with open("pedido.log", "w", encoding="utf-8") as f:
             for codigo,pedido in self.gestor.registrar_pedidos.items():
-                linea = f"{codigo}, {pedido.nombre}, {pedido.cantidad}, {pedido.prioridad}\n"
+                linea = f"{codigo},{pedido.nombre},{pedido.producto},{pedido.cantidad},{pedido.prioridad}\n"
                 f.write(linea)
         print("Pedidos guardados en archivo.")
 
@@ -109,6 +109,7 @@ while opcion != 4:
             print("Pedidos registrados:")
             gestion_pedidos.mostrar_infoA()
         case 4:
+            archivo.guardar_datos()
             print("Saliendo del programa")
         case _:
             print("Opcion no valida")
