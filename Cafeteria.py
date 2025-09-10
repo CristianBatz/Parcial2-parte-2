@@ -31,7 +31,7 @@ class GestionPedido:
         pedido.mostrar_info()
 
         if prioridad == "urgente":
-            notificar.notificar(pedido, codigo)
+            notificar.notificar(pedido, codigo, self)
 
     def buscar_pedido(self):
         print("=== Buscar pedido ===")
@@ -76,11 +76,23 @@ class GestionArchivosTextos:
         print("Pedidos guardados en archivo.")
 
 class NotificacionPedidoUrgente():
-    def notificar(self,pedido,codigo):
+    def notificar(self,pedido,codigo,gestor):
         if pedido.prioridad == "urgente":
             print("=== Notificación: Pedido Urgente ===")
             print(f"Código: {codigo}")
             pedido.mostrar_info()
+
+        print("\n=== Lista de TODOS los pedidos urgentes ===")
+        encontrados = 0
+        for codigo1, pedido2 in gestor.registrar_pedidos.items():
+            if pedido2.prioridad == "urgente":
+                print(f"Código: {codigo1}")
+                pedido2.mostrar_info()
+                encontrados += 1
+
+        if encontrados == 0:
+            print("No hay más pedidos urgentes registrados.")
+
 
 class Menu:
     def menu_mostrar(self):
