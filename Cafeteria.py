@@ -12,9 +12,9 @@ class Pedidos(Cliente):
     def mostrar_info(self):
         print(f"Nombre: {self.nombre}, producto: {self.producto}, cantidad: {self.cantidad}")
 
-class GestionPedido():
+class GestionPedido:
     def __init__(self):
-        self.Registrar_pedido = {}
+        self.registrar_pedidos = {}
 
     def agregar_pedido(self):
         print("=== Registrar pedido ===")
@@ -24,58 +24,62 @@ class GestionPedido():
         cantidad = input("Cantidad: ")
         prioridad = input("Prioridad (urgente/normal): ").lower()
 
-        self.Registrar_pedido[codigo] = {
-            "nombre": nombre,
-            "producto": producto,
-            "cantidad": cantidad,
-            "prioridad": prioridad
-        }
+        pedido = Pedidos(nombre, producto, cantidad, prioridad)
+        self.registrar_pedidos[codigo] = pedido
 
-        self.mostrar_infoA()
+        pedido.mostrar_info()
 
         if prioridad == "urgente":
-            NotificacionPedidoUrgente.notificar(nombre, codigo)
+            NotificacionPedidoUrgente.notificar(pedido, codigo)
 
     def buscar_pedido(self):
-        print("=== Buscando pedido ===")
+        print("=== Buscar pedido ===")
         codigo = input("Digite el código del pedido a buscar: ")
-        if codigo in self.Registrar_pedido:
-            print(f"Pedido encontrado:")
-            self.Registrar_pedido[codigo].mostrar_info()
+        pedido = self.registrar_pedidos.get(codigo)
+        if pedido:
+            print("Pedido encontrado:")
+            pedido.mostrar_info()
         else:
-            print(" Pedido no encontrado.")
+            print("Pedido no encontrado.")
 
     def mostrar_infoA(self):
-        if not self.Registrar_pedido:
-            print("Pedido no encontrado.")
+        if not self.registrar_pedidos:
+            print("No hay pedidos registrados.")
         else:
-            for codigo,pedido in self.Registrar_pedido.items():
-                print(f"codigo: {codigo}")
+            for codigo, pedido in self.registrar_pedidos.items():
+                print(f"Código: {codigo}")
                 pedido.mostrar_info()
 
 class GestionArchivosTextos:
-    try:
-        def cargar_datos(self):
-            with open("pedido.log", "w",encoding="utf-8") as f:
+    def __init__(self, gestor_pedidos):
+        self.gestor = gestor_pedidos
+
+    def cargar_datos(self):
+        try:
+            with open("pedido.log", "r", encoding="utf-8") as f:
                 for linea in f:
                     linea = linea.strip()
                     if linea:
-                        codigo,nombre,producto,cantidad,prioridad = linea.split(",")
-                        self.Registrar_pedido[codigo] = {
-                            "nombre": nombre,
-                            "producto": producto,
-                            "cantidad": cantidad,
-                            "prioridad": prioridad
-                            }
-            print("Pedidos cargados")
-    except FileNotFoundError:
-        print("Archivo pedido.log no existe,se creara un al guardar")
+                        codigo, nombre, producto, cantidad, prioridad = linea.split(",")
+                        pedido = Pedidos(nombre, producto, cantidad, prioridad)
+                        self.gestor.registrar_pedidos[codigo] = pedido
+            print("Pedidos cargados correctamente.")
+        except FileNotFoundError:
+            print("Archivo 'pedido.log' no encontrado. Se creará al guardar.")
+
+        def guardar_datos(self):
+            with open("pedido.log", "w", encoding="utf-8") as f:
+                for codigo,pedido in self.gestor.registrar_pedidos.items():
+                    linea = f"{codigo}, {pedido.nombre}, {pedido.cantidad}, {pedido.prioridad}\n"
+                    f.write(linea)
+            print("Pedidos guardados en archivo.")
 
 class NotificacionPedidoUrgente():
-
-    def notificar(self,nombre,codigo):
-        print("=== Pedidos Urgente ===")
-        print(f"Cliente: {nombre}, Código: {codigo}")
+    def notificar(self,pedido,codigo):
+        if pedido.prioridad == "urgente":
+            print("=== Notificación: Pedido Urgente ===")
+            print(f"Código: {codigo}")
+            pedido.mostrar_info()
 
 class Menu:
     def menu_mostrar(self):
@@ -86,8 +90,10 @@ class Menu:
         print("4. Salir")
 
 
-menu = Menu()
 gestion_pedidos = GestionPedido()
+archivo = GestionArchivosTextos(gestion_pedidos)
+archivo.cargar_datos()
+menu = Menu()
 opcion = 0
 while opcion != 4:
 
@@ -100,9 +106,7 @@ while opcion != 4:
             gestion_pedidos.buscar_pedido()
         case 3:
             print("Pedidos registrados:")
-            for codigo, datos in gestion_pedidos.Registrar_pedido.items():
-                print(f"codigo: {codigo}")
-                datos.mostrar_info()
+            gestion_pedidos.mostrar_infoA()
         case 4:
             print("Saliendo del programa")
         case _:
